@@ -1,15 +1,14 @@
-// These are necessary definitions that let you graphics card know how to render the shader
+// Estas son definiciones necesarias que le permiten a la tarjeta gráfica saber cómo representar el sombreador
 #ifdef GL_ES
 precision mediump float;
 #endif
-
-// In this example we care about where on the canvas the pixel is, so we need to know the size of the canvas.
-// This is passed in as a uniform from the sketch.js file.
   
   varying vec2 vTexCoord;
+  // Valores que se pasan desde p5
   uniform sampler2D u_img;
   uniform int u_key;
 
+// Funcion para convertir un color a escala de grises
 float grayscale(vec3 color) {
   float lightness;
   
@@ -50,6 +49,6 @@ void main() {
   }
   vec3 thresh = vec3(threshR, threshG, threshB);
 
-  // render de la salida
+  // Render de la salida
   gl_FragColor = vec4(thresh, 1.0);
 }

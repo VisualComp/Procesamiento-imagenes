@@ -1,38 +1,31 @@
-// These are necessary definitions that let you graphics card know how to render the shader
+// Estas son definiciones necesarias que le permiten a la tarjeta gráfica saber cómo representar el sombreador
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-
-// our texcoords from the vertex shader
+// Le permiten a la tarjeta gráfica saber cómo representar el sombreador
 varying vec2 vTexCoord;
 
-// the texture that we want to manipulate
+// La textura que queremos manipular
 uniform sampler2D u_img;
 uniform int u_key;
 
-// how big of a step to take. 1.0 / width = 1 texel
-// doing this math in p5 saves a little processing power
+// width y heidht con valores entre 0 y 1
 uniform vec2 stepSize;
 
-// an array with 9 vec2's
-// each index in the array will be a step in a different direction around a pixel
-// upper left, upper middle, upper right
-// middle left, middle, middle right
-// lower left, lower middle, lower right
+// Pasos en direccion distinta alrededor del pixel
 vec2 offset[9];
 
-// the convolution kernel we will use
-// different kernels produce different effects
-// we can do things like, emboss, sharpen, blur, etc.
+// Guarda la matriz de convolucion
 float kernel[9];
 
-// the sum total of all the values in the kernel
+// Suma total de todos los valores en el kernel
 //float kernelWeight = 0.0;
 
-// our final convolution value that will be rendered to the screen
+// Almaceena el valor de convolucion total
 vec4 conv = vec4(0.0);
 
+// Matrices de convolucion segun la tecla que se oprima 
 void convolution(){
   if (u_key==0){
 		kernel[0] = 0.0; kernel[1] = 0.0; kernel[2] = 0.0;
@@ -78,41 +71,35 @@ void convolution(){
 }
 
 void main(){
-
 	vec2 uv = vTexCoord;
-  // flip the y uvs
-  uv.y = 1.0 - uv.y;
-  
-  convolution();
-
-  // different values in the kernels produce different effects
-  // take a look here for some more examples https://en.wikipedia.org/wiki/Kernel_(image_processing) or https://docs.gimp.org/en/plug-in-convmatrix.html
-
-  // here are a few examples, try uncommenting them to see how they affect the image
- 
+  	// coltea la coredena y
+	uv.y = 1.0 - uv.y;
 	
-	offset[0] = vec2(-stepSize.x, -stepSize.y); // top left
-	offset[1] = vec2(0.0, -stepSize.y); // top middle
-	offset[2] = vec2(stepSize.x, -stepSize.y); // top right
-	offset[3] = vec2(-stepSize.x, 0.0); // middle left
-	offset[4] = vec2(0.0, 0.0); //middle
-	offset[5] = vec2(stepSize.x, 0.0); //middle right
-	offset[6] = vec2(-stepSize.x, stepSize.y); //bottom left
-	offset[7] = vec2(0.0, stepSize.y); //bottom middle
-	offset[8] = vec2(stepSize.x, stepSize.y); //bottom right
-
+	convolution();
+  	
+	// Se almacenan las posiciones en el offset
+	offset[0] = vec2(-stepSize.x, -stepSize.y); // arriba izquierda
+	offset[1] = vec2(0.0, -stepSize.y); // arriba centro
+	offset[2] = vec2(stepSize.x, -stepSize.y); // arriba derecha
+	offset[3] = vec2(-stepSize.x, 0.0); // centro izquierda
+	offset[4] = vec2(0.0, 0.0); // centro derecha
+	offset[5] = vec2(stepSize.x, 0.0); // centro izquierda
+	offset[6] = vec2(-stepSize.x, stepSize.y); // abajo izquierda
+	offset[7] = vec2(0.0, stepSize.y); // abajo centro
+	offset[8] = vec2(stepSize.x, stepSize.y); // abajo derecha
+	
 	for(int i = 0; i<9; i++){
-		//sample a 3x3 grid of pixels
+		// Nuevas cordenadas en las que se muestrara la textura. Una cuadricula de 3x3
 		vec4 color = texture2D(u_img, uv + offset[i]);
 
-    // multiply the color by the kernel value and add it to our conv total
+    // Multiplique el color por el valor del kernel y hace la sumatoria en total conv
 		conv += color * kernel[i];
 
-    // keep a running tally of the kernel weights
+    // Suma los valores del kernel
 		//kernelWeight += kernel[i];
 	}
 
-  // normalize the convolution by dividing by the kernel weight
+  // Normalizar la convolucion con la suma de todos los valores del nucleo
   //conv.rgb /= kernelWeight;
 		
 	gl_FragColor = vec4(conv.rgb, 1.0);
