@@ -9,8 +9,6 @@ let canvas_02;
 var heightI = 500;  // altura del lienzo
 var widthI = 500;   // anchura del lienzo
 
-let myTime = 0; // almacena la diferencia de tiempo de los frames en ms 
-
 function preload() {
     img_01 = createCapture(VIDEO);
     img_02 = createCapture(VIDEO);
@@ -18,8 +16,7 @@ function preload() {
     img_02.hide();
 }
 
-function setup() {
-    frameRate(50);
+function setup() {    
     var myCanvas = createCanvas(widthI*2+20, heightI);
     myCanvas.parent('eficiency'); 
     frameRate(30);
@@ -30,11 +27,8 @@ function setup() {
 }
 
 function draw(){
-    myTime += deltaTime;
-
     drawCanvas_01();
-    drawCanvas_02();
-    
+    drawCanvas_02();   
     selectValue();
 
     image(canvas_01, 0, 0);
@@ -140,27 +134,25 @@ function keyPressed(){
     }
 }
 
-//Funciones propias del desarrollo
+// Funciones propias del desarrollo
 const drawCanvas_01 = ()=>{ // pone el primer video en el lienzo 1
-
     canvas_01.image(img_01, 0, 0);
     canvas_01.textSize(40);
 
         //  imprime los frames por segundo 
-    canvas_01.text( (frameCount / (myTime/1000)).toFixed(2) + " F/S" , 20, 400);
+    canvas_01.text( frameRate().toFixed(2) + " F/S" , 20, 400);
 };
 
 const drawCanvas_02 = ()=>{ // pone el segundo video en el lienzo 2
-
     canvas_02.image(img_02, 0, 0);
     canvas_02.textSize(40);
 
-        // imprime los frames por segundo 
-    canvas_02.text( (frameCount / (myTime/1000)).toFixed(2) + " F/S" , 20, 400);
+        //  imprime los frames por segundo 
+    canvas_02.text( frameRate().toFixed(2) + " F/S" , 20, 400);
 };
 
 const selectValue = ()=>{
-        // selecciona el filtro a utilizar dependiendo del valor que tenga value
+        //selecciona el filtro a utilizar dependiendo del valor que tenga value
     if( 0 < value && value <10 ) {
         filtrosBlancoNegro(value);
     } else if(value === 'c') {
@@ -173,7 +165,6 @@ const selectValue = ()=>{
 // Funciones para aplicar filtros
 const filtrosBlancoNegro = (gray)=>{
     let lightness = 210;
-
     img_02.loadPixels();
 
 	for (let y = 0; y < img_02.height; y++) {
@@ -207,6 +198,7 @@ const filtrosBlancoNegro = (gray)=>{
 				let Y2020= 0.2627*r + 0.6780*g + 0.0593*b; // UHDTV,HDR
 				lightness = Y2020;
 			} 
+
 			img_02.pixels[index+0]=lightness;
 			img_02.pixels[index+1]=lightness;
 			img_02.pixels[index+2]=lightness;
@@ -230,13 +222,11 @@ const complementary = ()=>{
     for(var y = 0 ; y < img_02.height; y++) {
         for(var x = 0; x < img_02.width; x++) {
             let index = (x + y * img_02.width) * 4;
-
             img_02.pixels[index + 0] = 255 - img_02.pixels[index + 0];
             img_02.pixels[index + 1] = 255 - img_02.pixels[index + 1];
             img_02.pixels[index + 2] = 255 - img_02.pixels[index + 2];
         }
     }
-
     img_02.updatePixels();
 }
 
@@ -247,14 +237,12 @@ const convolutions = ()=>{
 		for (let y = 0; y < img_02.height; y++ ) { 
 			let c = convolutionAux(x, y, matrix, matrixsize, img_02);
 			let loc = (x + y*img_02.width)*4;
-
 			img_02.pixels[loc] = red(c);
 			img_02.pixels[loc+1] = green(c);
 			img_02.pixels[loc+2] = blue(c);
 			img_02.pixels[loc+3] = alpha(c);
 		}
-    }
-    
+    }    
     img_02.updatePixels();
 }
 
@@ -277,7 +265,7 @@ const convolutionAux = (x, y, matrix, matrixsize, img)=>{
 			atotal += ((img.pixels[loc+3]) * matrix[i][j]);
 		}
 	}
-	// Restringe el valor
+	// Restringe el valor de RGB
 	rtotal = constrain(rtotal, 0, 255);
 	gtotal = constrain(gtotal, 0, 255);
 	btotal = constrain(btotal, 0, 255);
